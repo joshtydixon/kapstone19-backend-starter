@@ -1,13 +1,13 @@
 const express = require("express");
 const { nanoid } = require("nanoid");
+// Mock DB
+// const db = require("./database.json");
+// const { login } = auth;
+// const auth = require("./auth");
+
 const app = express();
 const port = 3000;
-
-// Express middleware
-app.use(express.json());
-
-// Mock DB
-let db = {
+const db = {
   users: [
     { username: "casey", password: "123" },
     { username: "marc", password: "123" },
@@ -91,6 +91,9 @@ let db = {
     },
   ],
 };
+
+// Express middleware
+app.use(express.json());
 
 app.get("/", (req, res) => {
   res.send("Hello World");
@@ -186,7 +189,86 @@ app.post("/projects/:username", (req, res) => {
 app.patch("/project/title/:projectId", (req, res) => {
   const { projectId } = req.params;
   const { newTitle } = req.body;
-  //stuff
+  const projectIndex = db.projects.findIndex(
+    (project) => project.projectId === projectId
+  );
+  if (projectIndex !== -1) {
+    db.projects[projectIndex].projectTitle = newTitle;
+    res.status(201).send(db.projects[projectIndex]);
+  } else {
+    res.status(404).send("Hmm, can't seem to find that project. 🕷");
+  }
+});
+
+// add project users
+app.post("/project/users/:projectId", (req, res) => {
+  const { projectId } = req.params;
+  const { newUser } = req.body;
+  const projectIndex = db.projects.findIndex(
+    (project) => project.projectId === projectId
+  );
+  const userExists = db.users.some((user) => user.username === newUser);
+  if (userExists) {
+    if (projectIndex !== -1) {
+      if (!db.projects[projectIndex].usernames.includes(newUser)) {
+        db.projects[projectIndex].usernames.push(newUser);
+        res.status(201).send(db.projects[projectIndex]);
+      } else {
+        res.status(401).send("That user is already part of the project.");
+      }
+    } else {
+      res.status(404).send("Hmm, can't seem to find that project. 🕷");
+    }
+  } else {
+    res.status(404).send("Hmm, can't seem to find that user. 🐍");
+  }
+});
+
+// remove user from project
+app.delete("/project/users/:projectId", (req, res) => {
+  const { projectId } = req.params;
+  const { user } = req.body;
+  const projectIndex = db.projects.findIndex(
+    (project) => project.projectId === projectId
+  );
+  if (projectIndex !== -1) {
+    if (!db.projects[projectIndex].usernames.includes(user)) {
+      res.status(404).send("We couldn't find that user on the list. 😢");
+    } else if (db.projects[projectIndex].usernames.length === 1) {
+      res
+        .status(401)
+        .send(
+          "You are the only user, silly! If you're done with this project then delete it."
+        );
+    } else {
+      filteredUserNames = db.projects[projectIndex].usernames.filter(
+        (username) => username !== user
+      );
+      db.projects[projectIndex].usernames = filteredUserNames;
+      res.status(202).send(db.projects[projectIndex]);
+    }
+  } else {
+    res.status(404).send("Hmm, can't seem to find that project. 🕷");
+  }
+});
+
+//add column
+app.post("/project/column/:projectId", (req, res) => {
+  const { projectId } = req.params;
+  const { columnTitle } = req.body;
+  const projectIndex = db.projects.findIndex(
+    (project) => project.projectId === projectId
+  );
+
+  if (projectIndex !== -1) {
+    db.projects[projectIndex].columnNames.push({
+      name: columnTitle,
+      id: nanoid(),
+    });
+    res.status(201).send(db.projects[projectIndex]);
+  } else {
+    res.status(404).send("Hmm, can't seem to find that project. 🕷");
+  }
 });
 
 app.listen(port, () => {

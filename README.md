@@ -9,9 +9,9 @@
 [x] get projectBoards
 [x] get projectBoards by user
 [x] add new projectBoard
-[] edit project name - patch
-[] add user to projectBoard - post
-[] remove user from project board? - delete
+[x] edit project name - patch
+[x] add user to projectBoard - post
+[x] remove user from project board? - delete
 [] delete projectBoard
 
 # columns
@@ -27,3 +27,8 @@
 [] move todo --todo position
 [] toggle complete
 [] delete todo
+
+# Extras
+
+[] disperse functions into other files
+[] move db to its own file
