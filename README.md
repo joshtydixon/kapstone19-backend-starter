@@ -1,28 +1,29 @@
 # kapstone19-backend-starter
-[] create user
-[] login user
+
+[x] create user
+[x] login user
 [] delete user
 
 # projectBoards
 
-[] get projectBoards
-[] get projectBoards by user
-[] add new projectBoard
+[x] get projectBoards
+[x] get projectBoards by user
+[x] add new projectBoard
+[] edit project name - patch
+[] add user to projectBoard - post
+[] remove user from project board? - delete
 [] delete projectBoard
-[] edit project name
-[] add user to projectBoard
-[] remove user from project board?
 
 # columns
 
 [] add column
-[] delete column
 [] edit column name
+[] delete column
 
 # todos
 
 [] add todo
-[] delete todo
 [] edit todo text
 [] move todo --todo position
 [] toggle complete
+[] delete todo
