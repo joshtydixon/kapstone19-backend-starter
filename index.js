@@ -118,14 +118,14 @@ app.post("/login", (req, res) => {
   const userIndex = db.users.findIndex((user) => user.username === username);
   if (userIndex !== -1) {
     if (db.users[userIndex].password === password) {
-      res.statusCode(201).send({ username: db.users[userIndex].username });
+      res.status(201).send({ username: db.users[userIndex].username });
     } else {
-      res.statusCode(401).send({
+      res.status(401).send({
         message: "That password doesn't seem to be right.",
       });
     }
   } else {
-    res.statusCode(404).send({
+    res.status(404).send({
       message:
         "We can't find that user on our side, maybe check your spelling 😅.",
     });
@@ -153,11 +153,9 @@ app.post("/signup", (req, res) => {
       projectId: nanoid(),
     };
     db.projects.push(tempProject);
-    res
-      .statusCode(201)
-      .send({ message: "Congrats, you just made an account! 😍" });
+    res.status(201).send({ message: "Congrats, you just made an account! 😍" });
   } else {
-    res.statusCode(401).send({ message: "That username is already taken. 😭" });
+    res.status(401).send({ message: "That username is already taken. 😭" });
   }
 });
 
@@ -182,16 +180,16 @@ app.delete("/user/delete", (req, res) => {
         (project) => !project.usernames.includes(username)
       );
       db.projects = filteredProjects;
-      res.statusCode(202).send({
+      res.status(202).send({
         message: "Congrats I guess, we're a little sad to see you go. 😂",
       });
     } else {
       res
-        .statusCode(401)
+        .status(401)
         .send({ message: "That password doesn't seem to be right. 🤨" });
     }
   } else {
-    res.statusCode(404).send({
+    res.status(404).send({
       message:
         "We can't find that user on our side, maybe check your spelling 😅.",
     });
@@ -210,11 +208,9 @@ app.get("/projects/:username", (req, res) => {
     const filteredDB = db.projects.filter((project) =>
       project.usernames.includes(username)
     );
-    res.statusCode(200).send(filteredDB);
+    res.status(200).send(filteredDB);
   }
-  res
-    .statusCode(404)
-    .send({ message: "Hmm, can't seem to find that user. 🐍" });
+  res.status(404).send({ message: "Hmm, can't seem to find that user. 🐍" });
 });
 
 // Add new project board
@@ -237,7 +233,7 @@ app.post("/projects/:username", (req, res) => {
     projectId: nanoid(),
   };
   db.projects.push(tempProject);
-  res.statusCode(201).send(tempProject);
+  res.status(201).send(tempProject);
 });
 
 // delete project board
@@ -252,19 +248,19 @@ app.delete("/project/:projectId", (req, res) => {
         (project) => project.projectId !== projectId
       );
       db.projects = filteredProjects;
-      res.statusCode(202).send({
+      res.status(202).send({
         message:
           "Congrats, that project board has been wiped off the face of this earth. 👽",
       });
     } else {
-      res.statusCode(401).send({
+      res.status(401).send({
         message:
           "There are multiple users on this project, if you want to delete it you need to remove the other users first or you can remove yourself from the user list.",
       });
     }
   } else {
     res
-      .statusCode(404)
+      .status(404)
       .send({ message: "Hmm, can't seem to find that project. 🕷" });
   }
 });
@@ -278,10 +274,10 @@ app.patch("/project/title/:projectId", (req, res) => {
   );
   if (projectIndex !== -1) {
     db.projects[projectIndex].projectTitle = newTitle;
-    res.statusCode(201).send(db.projects[projectIndex]);
+    res.status(201).send(db.projects[projectIndex]);
   } else {
     res
-      .statusCode(404)
+      .status(404)
       .send({ message: "Hmm, can't seem to find that project. 🕷" });
   }
 });
@@ -298,21 +294,19 @@ app.post("/project/users/:projectId", (req, res) => {
     if (projectIndex !== -1) {
       if (!db.projects[projectIndex].usernames.includes(newUser)) {
         db.projects[projectIndex].usernames.push(newUser);
-        res.statusCode(201).send(db.projects[projectIndex]);
+        res.status(201).send(db.projects[projectIndex]);
       } else {
         res
-          .statusCode(401)
+          .status(401)
           .send({ message: "That user is already part of the project." });
       }
     } else {
       res
-        .statusCode(404)
+        .status(404)
         .send({ message: "Hmm, can't seem to find that project. 🕷" });
     }
   } else {
-    res
-      .statusCode(404)
-      .send({ message: "Hmm, can't seem to find that user. 🐍" });
+    res.status(404).send({ message: "Hmm, can't seem to find that user. 🐍" });
   }
 });
 
@@ -325,9 +319,9 @@ app.delete("/project/users/:projectId", (req, res) => {
   );
   if (projectIndex !== -1) {
     if (!db.projects[projectIndex].usernames.includes(user)) {
-      res.statusCode(404).send("We couldn't find that user on the list. 😢");
+      res.status(404).send("We couldn't find that user on the list. 😢");
     } else if (db.projects[projectIndex].usernames.length === 1) {
-      res.statusCode(401).send({
+      res.status(401).send({
         message:
           "You are the only user, silly! If you're done with this project then delete it.",
       });
@@ -336,11 +330,11 @@ app.delete("/project/users/:projectId", (req, res) => {
         (username) => username !== user
       );
       db.projects[projectIndex].usernames = filteredUserNames;
-      res.statusCode(202).send(db.projects[projectIndex]);
+      res.status(202).send(db.projects[projectIndex]);
     }
   } else {
     res
-      .statusCode(404)
+      .status(404)
       .send({ message: "Hmm, can't seem to find that project. 🕷" });
   }
 });
@@ -358,10 +352,10 @@ app.post("/project/column/:projectId", (req, res) => {
       name: columnTitle,
       id: nanoid(),
     });
-    res.statusCode(201).send(db.projects[projectIndex]);
+    res.status(201).send(db.projects[projectIndex]);
   } else {
     res
-      .statusCode(404)
+      .status(404)
       .send({ message: "Hmm, can't seem to find that project. 🕷" });
   }
 });
@@ -380,12 +374,12 @@ app.patch("/project/column/:projectId", (req, res) => {
     );
     if (columnIndex !== -1) {
       db.projects[projectIndex].columnNames[columnIndex].name = columnTitle;
-      res.statusCode(201).send(db.projects[projectIndex]);
+      res.status(201).send(db.projects[projectIndex]);
     } else {
-      res.statusCode(404).send({ message: "We couldn't find that column. 😢" });
+      res.status(404).send({ message: "We couldn't find that column. 😢" });
     }
   } else {
-    res.statusCode(404).send({ message: "We couldn't find that project. 😭" });
+    res.status(404).send({ message: "We couldn't find that project. 😭" });
   }
 });
 
@@ -422,10 +416,10 @@ app.delete("/project/column/:projectId", (req, res) => {
       );
       db.projects[projectIndex].columnNames = filteredColumns;
       db.projects[projectIndex].todos = filteredTodos;
-      res.statusCode(202).send(db.projects[projectIndex]);
+      res.status(202).send(db.projects[projectIndex]);
     }
   } else {
-    res.statusCode(404).send({ message: "We couldn't find that project. 😭" });
+    res.status(404).send({ message: "We couldn't find that project. 😭" });
   }
 });
 
@@ -443,9 +437,9 @@ app.post("/project/todo/:projectId", (req, res) => {
       completed: false,
       columnPosition: columnPosition,
     });
-    res.statusCode(201).send(db.projects[projectIndex]);
+    res.status(201).send(db.projects[projectIndex]);
   } else {
-    res.statusCode(404).send({ message: "We couldn't find that project. 😭" });
+    res.status(404).send({ message: "We couldn't find that project. 😭" });
   }
 });
 
@@ -462,12 +456,12 @@ app.patch("/project/todo/text/:projectId", (req, res) => {
     );
     if (todoIndex !== -1) {
       db.projects[projectIndex].todos[todoIndex].text = text;
-      res.statusCode(201).send(db.projects[projectIndex]);
+      res.status(201).send(db.projects[projectIndex]);
     } else {
-      res.statusCode(404).send({ message: "We couldn't find that todo. 😢" });
+      res.status(404).send({ message: "We couldn't find that todo. 😢" });
     }
   } else {
-    res.statusCode(404).send({ message: "We couldn't find that project. 😭" });
+    res.status(404).send({ message: "We couldn't find that project. 😭" });
   }
 });
 
@@ -486,12 +480,12 @@ app.patch("/project/todo/position/:projectId", (req, res) => {
       db.projects[projectIndex].todos[
         todoIndex
       ].columnPosition = columnPosition;
-      res.statusCode(201).send(db.projects[projectIndex]);
+      res.status(201).send(db.projects[projectIndex]);
     } else {
-      res.statusCode(404).send({ message: "We couldn't find that todo. 😢" });
+      res.status(404).send({ message: "We couldn't find that todo. 😢" });
     }
   } else {
-    res.statusCode(404).send({ message: "We couldn't find that project. 😭" });
+    res.status(404).send({ message: "We couldn't find that project. 😭" });
   }
 });
 
@@ -509,12 +503,12 @@ app.patch("/project/todo/completed/:projectId", (req, res) => {
     if (todoIndex !== -1) {
       db.projects[projectIndex].todos[todoIndex].completed = boolean;
       db.projects[projectIndex].todos[todoIndex].columnPosition = 0;
-      res.statusCode(201).send(db.projects[projectIndex]);
+      res.status(201).send(db.projects[projectIndex]);
     } else {
-      res.statusCode(404).send({ message: "We couldn't find that todo. 😢" });
+      res.status(404).send({ message: "We couldn't find that todo. 😢" });
     }
   } else {
-    res.statusCode(404).send({ message: "We couldn't find that project. 😭" });
+    res.status(404).send({ message: "We couldn't find that project. 😭" });
   }
 });
 
@@ -532,12 +526,12 @@ app.delete("/project/todo/:projectId", (req, res) => {
       );
       db.projects[projectIndex].todos = filteredTodos;
 
-      res.statusCode(202).send(db.projects[projectIndex]);
+      res.status(202).send(db.projects[projectIndex]);
     } else {
-      res.statusCode(404).send({ message: "We couldn't find that todo. 😢" });
+      res.status(404).send({ message: "We couldn't find that todo. 😢" });
     }
   } else {
-    res.statusCode(404).send({ message: "We couldn't find that project. 😭" });
+    res.status(404).send({ message: "We couldn't find that project. 😭" });
   }
 });
 
