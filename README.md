@@ -1,8 +1,14 @@
 # kapstone19-backend-starter
 
+# user
+
 [x] create user
 [x] login user
-[] delete user
+[x] delete user
+-- find projects that they are a part of
+-- if they are the only user then delete project
+-- if they are not the only user, then remove from usernames list
+-- delete user
 
 # projectBoards
 
@@ -12,21 +18,24 @@
 [x] edit project name - patch
 [x] add user to projectBoard - post
 [x] remove user from project board? - delete
-[] delete projectBoard
+[x] delete projectBoard
 
 # columns
 
-[] add column
-[] edit column name
-[] delete column
+[x] add column
+[x] edit column name
+[x] delete column
+-delete all todos in the column
+-change columnPosition for all todos after column position
+-delete the column
 
 # todos
 
-[] add todo
-[] edit todo text
-[] move todo --todo position
-[] toggle complete
-[] delete todo
+[x] add todo
+[x] edit todo text
+[x] move todo --todo position
+[x] toggle complete
+[x] delete todo
 
 # Extras
 

@@ -145,6 +145,42 @@ app.post("/signup", (req, res) => {
   }
 });
 
+// Delete User
+app.delete("/user/delete", (req, res) => {
+  const { username, password } = req.body;
+  const userIndex = db.users.findIndex((user) => user.username === username);
+  if (userIndex !== -1) {
+    if (db.users[userIndex].password === password) {
+      db.projects.forEach((project) => {
+        if (
+          project.usernames.length > 1 &&
+          project.usernames.includes(username)
+        ) {
+          const filteredUserNames = project.usernames.filter(
+            (u) => u !== username
+          );
+          project.usernames = filteredUserNames;
+        }
+      });
+      const filteredProjects = db.projects.filter(
+        (project) => !project.usernames.includes(username)
+      );
+      db.projects = filteredProjects;
+      res
+        .status(202)
+        .send("Congrats I guess, we're a little sad to see you go. 😂");
+    } else {
+      res.status(401).send("That password doesn't seem to be right. 🤨");
+    }
+  } else {
+    res
+      .status(404)
+      .send(
+        "We can't find that user on our side, maybe check your spelling 😅."
+      );
+  }
+});
+
 // Get all projects
 app.get("/projects", (req, res) => {
   res.send(db.projects);
@@ -183,6 +219,35 @@ app.post("/projects/:username", (req, res) => {
   };
   db.projects.push(tempProject);
   res.status(201).send(tempProject);
+});
+
+// delete project board
+app.delete("/project/:projectId", (req, res) => {
+  const { projectId } = req.params;
+  const projectIndex = db.projects.findIndex(
+    (project) => project.projectId === projectId
+  );
+  if (projectIndex !== -1) {
+    if (db.projects[projectIndex].usernames.length === 1) {
+      const filteredProjects = db.projects.filter(
+        (project) => project.projectId !== projectId
+      );
+      db.projects = filteredProjects;
+      res
+        .status(202)
+        .send(
+          "Congrats, that project board has been wiped off the face of this earth. 👽"
+        );
+    } else {
+      res
+        .status(401)
+        .send(
+          "There are multiple users on this project, if you want to delete it you need to remove the other users first or you can remove yourself from the user list."
+        );
+    }
+  } else {
+    res.status(404).send("Hmm, can't seem to find that project. 🕷");
+  }
 });
 
 // edit project title
@@ -268,6 +333,181 @@ app.post("/project/column/:projectId", (req, res) => {
     res.status(201).send(db.projects[projectIndex]);
   } else {
     res.status(404).send("Hmm, can't seem to find that project. 🕷");
+  }
+});
+
+// edit column title
+app.patch("/project/column/:projectId", (req, res) => {
+  const { projectId } = req.params;
+  const { columnTitle, columnId } = req.body;
+  const projectIndex = db.projects.findIndex(
+    (project) => project.projectId === projectId
+  );
+
+  if (projectIndex !== -1) {
+    const columnIndex = db.projects[projectIndex].columnNames.findIndex(
+      (column) => column.id === columnId
+    );
+    if (columnIndex !== -1) {
+      db.projects[projectIndex].columnNames[columnIndex].name = columnTitle;
+      res.status(201).send(db.projects[projectIndex]);
+    } else {
+      res.status(404).send("We couldn't find that column. 😢");
+    }
+  } else {
+    res.status(404).send("We couldn't find that project. 😭");
+  }
+});
+
+// delete column
+app.delete("/project/column/:projectId", (req, res) => {
+  const { projectId } = req.params;
+  const { columnId } = req.body;
+  const projectIndex = db.projects.findIndex(
+    (project) => project.projectId === projectId
+  );
+
+  if (projectIndex !== -1) {
+    const columnIndex = db.projects[projectIndex].columnNames.findIndex(
+      (column) => column.id === columnId
+    );
+    if (columnIndex !== -1) {
+      let filteredTodos = db.projects[projectIndex].todos.filter(function (
+        todo
+      ) {
+        if (todo.completed) {
+          return true;
+        } else if (todo.columnPosition !== columnIndex) {
+          return true;
+        }
+      });
+      filteredTodos = filteredTodos.map((todo) => {
+        if (todo.columnPosition > columnIndex) {
+          todo.columnPosition = todo.columnPosition - 1;
+        }
+        return todo;
+      });
+      const filteredColumns = db.projects[projectIndex].columnNames.filter(
+        (column) => column.id !== columnId
+      );
+      db.projects[projectIndex].columnNames = filteredColumns;
+      db.projects[projectIndex].todos = filteredTodos;
+      res.status(202).send(db.projects[projectIndex]);
+    }
+  } else {
+    res.status(404).send("We couldn't find that project. 😭");
+  }
+});
+
+// add todo
+app.post("/project/todo/:projectId", (req, res) => {
+  const { projectId } = req.params;
+  const { text, columnPosition } = req.body;
+  const projectIndex = db.projects.findIndex(
+    (project) => project.projectId === projectId
+  );
+  if (projectIndex !== -1) {
+    db.projects[projectIndex].todos.push({
+      text: text,
+      id: nanoid(),
+      completed: false,
+      columnPosition: columnPosition,
+    });
+    res.status(201).send(db.projects[projectIndex]);
+  } else {
+    res.status(404).send("We couldn't find that project. 😭");
+  }
+});
+
+//edit todo text
+app.patch("/project/todo/text/:projectId", (req, res) => {
+  const { projectId } = req.params;
+  const { text, todoId } = req.body;
+  const projectIndex = db.projects.findIndex(
+    (project) => project.projectId === projectId
+  );
+  if (projectIndex !== -1) {
+    const todoIndex = db.projects[projectIndex].todos.findIndex(
+      (todo) => todo.id === todoId
+    );
+    if (todoIndex !== -1) {
+      db.projects[projectIndex].todos[todoIndex].text = text;
+      res.status(201).send(db.projects[projectIndex]);
+    } else {
+      res.status(404).send("We couldn't find that todo. 😢");
+    }
+  } else {
+    res.status(404).send("We couldn't find that project. 😭");
+  }
+});
+
+//edit todo position
+app.patch("/project/todo/position/:projectId", (req, res) => {
+  const { projectId } = req.params;
+  const { columnPosition, todoId } = req.body;
+  const projectIndex = db.projects.findIndex(
+    (project) => project.projectId === projectId
+  );
+  if (projectIndex !== -1) {
+    const todoIndex = db.projects[projectIndex].todos.findIndex(
+      (todo) => todo.id === todoId
+    );
+    if (todoIndex !== -1) {
+      db.projects[projectIndex].todos[
+        todoIndex
+      ].columnPosition = columnPosition;
+      res.status(201).send(db.projects[projectIndex]);
+    } else {
+      res.status(404).send("We couldn't find that todo. 😢");
+    }
+  } else {
+    res.status(404).send("We couldn't find that project. 😭");
+  }
+});
+
+//toggle todo complete
+app.patch("/project/todo/completed/:projectId", (req, res) => {
+  const { projectId } = req.params;
+  const { boolean, todoId } = req.body;
+  const projectIndex = db.projects.findIndex(
+    (project) => project.projectId === projectId
+  );
+  if (projectIndex !== -1) {
+    const todoIndex = db.projects[projectIndex].todos.findIndex(
+      (todo) => todo.id === todoId
+    );
+    if (todoIndex !== -1) {
+      db.projects[projectIndex].todos[todoIndex].completed = boolean;
+      db.projects[projectIndex].todos[todoIndex].columnPosition = 0;
+      res.status(201).send(db.projects[projectIndex]);
+    } else {
+      res.status(404).send("We couldn't find that todo. 😢");
+    }
+  } else {
+    res.status(404).send("We couldn't find that project. 😭");
+  }
+});
+
+//delete todo
+app.delete("/project/todo/:projectId", (req, res) => {
+  const { projectId } = req.params;
+  const { todoId } = req.body;
+  const projectIndex = db.projects.findIndex(
+    (project) => project.projectId === projectId
+  );
+  if (projectIndex !== -1) {
+    if (db.projects[projectIndex].todos.some((todo) => todo.id === todoId)) {
+      const filteredTodos = db.projects[projectIndex].todos.filter(
+        (todo) => todo.id !== todoId
+      );
+      db.projects[projectIndex].todos = filteredTodos;
+
+      res.status(202).send(db.projects[projectIndex]);
+    } else {
+      res.status(404).send("We couldn't find that todo. 😢");
+    }
+  } else {
+    res.status(404).send("We couldn't find that project. 😭");
   }
 });
 
