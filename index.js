@@ -118,9 +118,15 @@ app.post("/login", (req, res) => {
   const userIndex = db.users.findIndex((user) => user.username === username);
   if (userIndex !== -1) {
     if (db.users[userIndex].password === password) {
-      res
-        .status(201)
-        .send({ statusCode: 201, username: db.users[userIndex].username });
+      const filteredDB = db.projects.filter((project) =>
+        project.usernames.includes(username)
+      );
+      const content = {
+        username: db.users[userIndex].username,
+        projects: filteredDB,
+        currentProject: filteredDB[0],
+      };
+      res.status(201).send({ statusCode: 201, content: content });
     } else {
       res.status(401).send({
         statusCode: 401,
