@@ -180,6 +180,7 @@ app.delete("/user/delete", (req, res) => {
         (project) => !project.usernames.includes(username)
       );
       db.projects = filteredProjects;
+      db.users = db.users.filter((user) => user.username !== username);
       res.status(202).send({
         message: "Congrats I guess, we're a little sad to see you go. 😂",
       });
