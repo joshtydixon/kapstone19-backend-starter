@@ -487,7 +487,7 @@ app.delete("/project/column/:projectId", (req, res) => {
 // add todo
 app.post("/project/todo/:projectId", (req, res) => {
   const { projectId } = req.params;
-  const { text, columnPosition } = req.body;
+  const { text, columnPosition, username } = req.body;
   const projectIndex = db.projects.findIndex(
     (project) => project.projectId === projectId
   );
@@ -497,6 +497,8 @@ app.post("/project/todo/:projectId", (req, res) => {
       id: nanoid(),
       completed: false,
       columnPosition: columnPosition,
+      createdDate: new Date(),
+      createdBy: username,
     });
     res
       .status(201)
