@@ -223,16 +223,60 @@ app.get("/projects", (req, res) => {
 // Get Projects by Users
 app.get("/projects/:username", (req, res) => {
   const { username } = req.params;
+  const { filtered, sort } = req.query;
+
   if (db.users.some((user) => user.username === username)) {
-    const filteredDB = db.projects.filter((project) =>
+    let filteredDB = db.projects.filter((project) =>
       project.usernames.includes(username)
     );
+
+    if (filtered) {
+      if (filtered === "individual") {
+        filteredDB = filteredDB.filter(
+          (project) => project.usernames.length === 1
+        );
+      } else if (filtered === "group") {
+        filteredDB = filteredDB.filter(
+          (project) => project.usernames.length > 1
+        );
+      }
+    }
+    // sorting
+    if (sort) {
+      if (sort === "newToOld") {
+        filteredDB.reverse();
+      }
+      if (sort === "a2z") {
+        filteredDB.sort((a, b) => {
+          if (a.projectTitle.toLowerCase() < b.projectTitle.toLowerCase()) {
+            return -1;
+          }
+          if (a.projectTitle.toLowerCase() > b.projectTitle.toLowerCase()) {
+            return 1;
+          }
+          return 0;
+        });
+      }
+      if (sort === "z2a") {
+        filteredDB.sort((a, b) => {
+          if (a.projectTitle.toLowerCase() < b.projectTitle.toLowerCase()) {
+            return 1;
+          }
+          if (a.projectTitle.toLowerCase() > b.projectTitle.toLowerCase()) {
+            return -1;
+          }
+          return 0;
+        });
+      }
+    }
+
     res.status(200).send({ content: filteredDB, statusCode: 200 });
+  } else {
+    res.status(404).send({
+      statusCode: 404,
+      message: "Hmm, can't seem to find that user. 🐍",
+    });
   }
-  res.status(404).send({
-    statusCode: 404,
-    message: "Hmm, can't seem to find that user. 🐍",
-  });
 });
 
 // Add new project board
