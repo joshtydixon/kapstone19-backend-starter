@@ -1,9 +1,5 @@
 const express = require("express");
 const { nanoid } = require("nanoid");
-// Mock DB
-// const db = require("./database.json");
-// const { login } = auth;
-// const auth = require("./auth");
 const app = express();
 const port = 3000;
 
