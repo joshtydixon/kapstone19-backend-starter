@@ -280,7 +280,7 @@ app.post("/projects/:username", (req, res) => {
   const { username } = req.params;
   const { title } = req.body;
   if (db.users.some((user) => user.username === username)) {
-    tempProject = {
+    let tempProject = {
       usernames: [username],
       projectTitle: title,
       columnNames: [{ name: "Change My Name", id: nanoid() }],
@@ -666,6 +666,6 @@ app.delete("/project/todo/:projectId", (req, res) => {
   }
 });
 
-app.listen(port, () => {
-  console.log(`Example app listening at http://localhost:${port}`);
+const listener = app.listen(3000, () => {
+  console.log(`Example app listening on port ` + listener.address().port);
 });
