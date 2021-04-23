@@ -142,31 +142,57 @@ app.post("/login", (req, res) => {
 app.post("/signup", (req, res) => {
   const { username, password } = req.body;
   // const userIndex = db.users.findIndex((user) => user.username === username);
-  if (!db.users.some((user) => user.username === username)) {
-    db.users.push({ username: username, password: password });
-    tempProject = {
-      usernames: [username],
-      projectTitle: `${username}'s First Project`,
-      columnNames: [{ name: "Change My Name", id: nanoid() }],
-      todos: [
-        {
-          text: "Delete Me!",
-          id: nanoid(),
-          completed: false,
-          columnPosition: 0,
-        },
-      ],
-      projectId: nanoid(),
-    };
-    db.projects.push(tempProject);
-    res.status(201).send({
-      statusCode: 201,
-      message: "Congrats, you just made an account! 😍",
-    });
+  if (username && password) {
+    if (
+      !db.users.some((user) => user.username === username) &&
+      !/[^A-Za-z0-9]+/g.test(username) &&
+      password.length >= 6
+    ) {
+      db.users.push({ username: username, password: password });
+      tempProject = {
+        usernames: [username],
+        projectTitle: `${username}'s First Project`,
+        columnNames: [{ name: "Change My Name", id: nanoid() }],
+        todos: [
+          {
+            text: "Delete Me!",
+            id: nanoid(),
+            completed: false,
+            columnPosition: 0,
+          },
+        ],
+        projectId: nanoid(),
+      };
+      db.projects.push(tempProject);
+      res.status(201).send({
+        statusCode: 201,
+        message: "Congrats, you just made an account! 😍",
+      });
+    } else if (/[^A-Za-z0-9]+/g.test(username)) {
+      res.status(401).send({
+        statusCode: 401,
+        message: "Your username can only include letters and numbers. 😭",
+      });
+    } else if (password.length < 6) {
+      res.status(401).send({
+        statusCode: 401,
+        message: "Your password is too short. 😭",
+      });
+    } else {
+      res
+        .status(401)
+        .send({
+          statusCode: 401,
+          message: "That username is already taken. 😭",
+        });
+    }
   } else {
     res
       .status(401)
-      .send({ statusCode: 401, message: "That username is already taken. 😭" });
+      .send({
+        statusCode: 401,
+        message: "You need to include both a username and password. 👴🏻",
+      });
   }
 });
 
